@@ -1,7 +1,7 @@
 [Japanese/日本語](README.ja.md)
 
 # pot_plugin
-Tree style POT control
+This add-on allows you to select files to include in POT generation in a tree-like structure.
 
 ## Basics
 Available in ProjectSettings>Localization>PotPlugin  
