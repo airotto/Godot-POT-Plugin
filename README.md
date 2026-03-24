@@ -1,6 +1,6 @@
 [Japanese/日本語](README.ja.md)
 
-# pot_plugin
+# POT Plugin
 This add-on allows you to select files to include in POT generation in a tree-like structure.
 
 ## Basics
