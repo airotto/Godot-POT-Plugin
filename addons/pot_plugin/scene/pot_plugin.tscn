@@ -1,0 +1,199 @@
+[gd_scene format=3 uid="uid://b60xyuo73egay"]
+
+[ext_resource type="Script" uid="uid://cao76ce7kn52g" path="res://addons/pot_plugin/scene/pot_plugin.gd" id="1_datfx"]
+[ext_resource type="Script" uid="uid://cxq0qg270xt5g" path="res://addons/pot_plugin/scene/pot_tree.gd" id="2_3kt48"]
+[ext_resource type="Script" uid="uid://comiy8ykyv6le" path="res://addons/pot_plugin/scene/folder_color_manager.gd" id="3_58rbr"]
+
+[node name="PotPlugin" type="Control" unique_id=21242278]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_datfx")
+
+[node name="TabContainer" type="TabContainer" parent="." unique_id=599051277]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+current_tab = 0
+
+[node name="Generals" type="VBoxContainer" parent="TabContainer" unique_id=345169989]
+layout_mode = 2
+metadata/_tab_index = 0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="TabContainer/Generals" unique_id=888079070]
+layout_mode = 2
+
+[node name="POTGenerateButton" type="Button" parent="TabContainer/Generals/HBoxContainer" unique_id=465254963]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+tooltip_text = "POTを生成します。
+もし出力(下部パネル)にエラーが出た場合生成に失敗している可能性があります。
+NOTE : Project Settings/Localization/POT Generation のリストには影響しないようになっています。"
+text = "Generate"
+
+[node name="POTPathButton" type="Button" parent="TabContainer/Generals/HBoxContainer" unique_id=1618921778]
+unique_name_in_owner = true
+auto_translate_mode = 2
+layout_mode = 2
+tooltip_text = "POT生成の保存先を設定します。"
+text = "res://POT File.pot"
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="TabContainer/Generals" unique_id=1701029098]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="TabContainer/Generals/HBoxContainer2" unique_id=930848326]
+layout_mode = 2
+text = "Selected"
+
+[node name="SelectingPathLineEdit" type="LineEdit" parent="TabContainer/Generals/HBoxContainer2" unique_id=1345182608]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="POTTree" type="Tree" parent="TabContainer/Generals" unique_id=1738017107]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+columns = 2
+allow_rmb_select = true
+script = ExtResource("2_3kt48")
+
+[node name="FolderColorManager" type="Node" parent="TabContainer/Generals/POTTree" unique_id=431812287]
+script = ExtResource("3_58rbr")
+
+[node name="Settings" type="VBoxContainer" parent="TabContainer" unique_id=2096354655]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 1
+
+[node name="SettingFolderLocal" type="FoldableContainer" parent="TabContainer/Settings" unique_id=1926060585]
+layout_mode = 2
+title = "Local"
+
+[node name="VBoxContainer" type="VBoxContainer" parent="TabContainer/Settings/SettingFolderLocal" unique_id=1037496976]
+layout_mode = 2
+
+[node name="DarkThemeCheckButton" type="CheckButton" parent="TabContainer/Settings/SettingFolderLocal/VBoxContainer" unique_id=593653070]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 0
+tooltip_text = "エディターからダークテーマかを確認する方法が公開されていなかったので手動で実装しています
+切り替えるとツリーを再読み込みするため数秒固まります"
+button_pressed = true
+text = "Dark theme"
+
+[node name="ClassIconCheckButton" type="CheckButton" parent="TabContainer/Settings/SettingFolderLocal/VBoxContainer" unique_id=957524255]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 0
+tooltip_text = "クラスアイコンが表示されますが重くなります
+オフだと基本的なファイルアイコンになります"
+text = "Class icon"
+
+[node name="WarningCheckButton" type="CheckButton" parent="TabContainer/Settings/SettingFolderLocal/VBoxContainer" unique_id=1283217599]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 0
+tooltip_text = "POT生成時に保存先にすでにファイルが存在している場合、上書きの警告を表示するかどうか。"
+button_pressed = true
+text = "Overwrite Generation Warning"
+
+[node name="SettingFolderGeneratePOT" type="FoldableContainer" parent="TabContainer/Settings" unique_id=1294767861]
+layout_mode = 2
+title = "Generate POT"
+
+[node name="VBoxContainer" type="VBoxContainer" parent="TabContainer/Settings/SettingFolderGeneratePOT" unique_id=1547380674]
+layout_mode = 2
+
+[node name="SortCheckButton" type="CheckButton" parent="TabContainer/Settings/SettingFolderGeneratePOT/VBoxContainer" unique_id=632137394]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 0
+tooltip_text = "ONの場合:生成されたファイルの中身の順番をソートします。
+ファイルが見つかった順にソートされます。
+つまり、
+・同じファイルから複数の翻訳がある場合それは並んでいます。
+・フォルダ毎にまとまっています。
+・同じ階層の場合はアルファベット順です
+
+生成するたびにソートが実行されます。全てのファイルを探索するので少し時間がかかるかもしれません。
+OFFの場合:チェックを付けたファイル(orフォルダごとチェックの中に追加されたファイル)はチェックを付けた順になります"
+text = "Sort"
+
+[node name="AddBuitinStringsToPOTCheckButton" type="CheckButton" parent="TabContainer/Settings/SettingFolderGeneratePOT/VBoxContainer" unique_id=1103011955]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 0
+tooltip_text = "POT生成TabにあるGodotの機能です。そちらの説明を見てください。"
+text = "Add Built-in Strings"
+
+[node name="Tools" type="VBoxContainer" parent="TabContainer" unique_id=2057330210]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 2
+
+[node name="LoadFromPOTTabButton" type="Button" parent="TabContainer/Tools" unique_id=569223238]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 0
+tooltip_text = "POT生成Tabにあるものにチェックを入れます"
+text = "Load from Template Generation Tab"
+
+[node name="SaveToPOTTabButton" type="Button" parent="TabContainer/Tools" unique_id=2028887504]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 0
+tooltip_text = "POT生成Tabをこのプラグインの生成リストにします。
+（プラグインの使用をやめるとき用）"
+text = "Save To Template Generation Tab"
+
+[node name="DebugButton" type="Button" parent="TabContainer/Tools" unique_id=1580160311]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 0
+tooltip_text = "押すとエラーが起きていないか検証します。出力に結果が表示されます。"
+text = "Debug"
+
+[node name="ConfirmationDialog" type="ConfirmationDialog" parent="." unique_id=423962963]
+unique_name_in_owner = true
+oversampling_override = 1.0
+title = "確認"
+initial_position = 1
+
+[node name="LoadFromPOTTabConfirmationDialog" type="ConfirmationDialog" parent="." unique_id=2025379192]
+unique_name_in_owner = true
+oversampling_override = 1.0
+initial_position = 1
+size = Vector2i(458, 242)
+dialog_text = "Load OK?"
+
+[node name="SaveToPOTTabConfirmationDialog" type="ConfirmationDialog" parent="." unique_id=241830130]
+unique_name_in_owner = true
+oversampling_override = 1.0
+initial_position = 1
+size = Vector2i(458, 242)
+dialog_text = "Save OK?"
+
+[connection signal="visibility_changed" from="." to="." method="_on_visibility_changed"]
+[connection signal="pressed" from="TabContainer/Generals/HBoxContainer/POTGenerateButton" to="." method="_on_pot_generate_button_pressed"]
+[connection signal="pressed" from="TabContainer/Generals/HBoxContainer/POTPathButton" to="." method="_on_pot_path_button_pressed"]
+[connection signal="text_submitted" from="TabContainer/Generals/HBoxContainer2/SelectingPathLineEdit" to="." method="_on_selecting_path_line_edit_text_submitted"]
+[connection signal="toggled" from="TabContainer/Settings/SettingFolderLocal/VBoxContainer/DarkThemeCheckButton" to="." method="_on_dark_theme_check_button_toggled"]
+[connection signal="toggled" from="TabContainer/Settings/SettingFolderLocal/VBoxContainer/ClassIconCheckButton" to="." method="_on_class_icon_check_button_toggled"]
+[connection signal="toggled" from="TabContainer/Settings/SettingFolderLocal/VBoxContainer/WarningCheckButton" to="." method="_on_warning_check_button_toggled"]
+[connection signal="toggled" from="TabContainer/Settings/SettingFolderGeneratePOT/VBoxContainer/SortCheckButton" to="." method="_on_sort_check_button_toggled"]
+[connection signal="toggled" from="TabContainer/Settings/SettingFolderGeneratePOT/VBoxContainer/AddBuitinStringsToPOTCheckButton" to="." method="_on_add_buitin_strings_to_pot_check_button_toggled"]
+[connection signal="pressed" from="TabContainer/Tools/LoadFromPOTTabButton" to="." method="_on_load_from_pot_tab_button_pressed"]
+[connection signal="pressed" from="TabContainer/Tools/SaveToPOTTabButton" to="." method="_on_save_to_pot_tab_button_pressed"]
+[connection signal="pressed" from="TabContainer/Tools/DebugButton" to="." method="_on_debug_button_pressed"]
+[connection signal="confirmed" from="ConfirmationDialog" to="." method="_on_confirmation_dialog_confirmed"]
+[connection signal="confirmed" from="LoadFromPOTTabConfirmationDialog" to="." method="_on_load_from_pot_tab_confirmation_dialog_confirmed"]
+[connection signal="confirmed" from="SaveToPOTTabConfirmationDialog" to="." method="_on_save_to_pot_tab_confirmation_dialog_confirmed"]
