@@ -106,6 +106,12 @@ tooltip_text = "POT生成時に保存先にすでにファイルが存在して�
 button_pressed = true
 text = "Overwrite Generation Warning"
 
+[node name="ConfirmationDialog" type="ConfirmationDialog" parent="TabContainer/Settings/SettingFolderLocal/VBoxContainer/WarningCheckButton" unique_id=423962963]
+unique_name_in_owner = true
+oversampling_override = 1.0
+title = "確認"
+initial_position = 1
+
 [node name="SettingFolderGeneratePOT" type="FoldableContainer" parent="TabContainer/Settings" unique_id=1294767861]
 layout_mode = 2
 title = "Generate POT"
@@ -133,15 +139,8 @@ text = "Sort"
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 0
-tooltip_text = "ONの場合:生成されたファイルの中身の順番をソートします。
-ファイルが見つかった順にソートされます。
-つまり、
-・同じファイルから複数の翻訳がある場合それは並んでいます。
-・フォルダ毎にまとまっています。
-・同じ階層の場合はアルファベット順です
-
-生成するたびにソートが実行されます。全てのファイルを探索するので少し時間がかかるかもしれません。
-OFFの場合:チェックを付けたファイル(orフォルダごとチェックの中に追加されたファイル)はチェックを付けた順になります"
+tooltip_text = "セーブデータでの順序をソートするかどうか。
+(ソート方法は上のソートと同じです)"
 button_pressed = true
 text = "Save Sort"
 
@@ -164,6 +163,13 @@ size_flags_horizontal = 0
 tooltip_text = "POT生成Tabにあるものにチェックを入れます"
 text = "Load from Template Generation Tab"
 
+[node name="LoadFromPOTTabConfirmationDialog" type="ConfirmationDialog" parent="TabContainer/Tools/LoadFromPOTTabButton" unique_id=2025379192]
+unique_name_in_owner = true
+oversampling_override = 1.0
+initial_position = 1
+size = Vector2i(458, 242)
+dialog_text = "Load OK?"
+
 [node name="SaveToPOTTabButton" type="Button" parent="TabContainer/Tools" unique_id=2028887504]
 unique_name_in_owner = true
 layout_mode = 2
@@ -172,32 +178,19 @@ tooltip_text = "POT生成Tabをこのプラグインの生成リストにしま�
 （プラグインの使用をやめるとき用）"
 text = "Save To Template Generation Tab"
 
+[node name="SaveToPOTTabConfirmationDialog" type="ConfirmationDialog" parent="TabContainer/Tools/SaveToPOTTabButton" unique_id=241830130]
+unique_name_in_owner = true
+oversampling_override = 1.0
+initial_position = 1
+size = Vector2i(458, 242)
+dialog_text = "Save OK?"
+
 [node name="DebugButton" type="Button" parent="TabContainer/Tools" unique_id=1580160311]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 0
 tooltip_text = "押すとエラーが起きていないか検証します。出力に結果が表示されます。"
 text = "Debug"
-
-[node name="ConfirmationDialog" type="ConfirmationDialog" parent="." unique_id=423962963]
-unique_name_in_owner = true
-oversampling_override = 1.0
-title = "確認"
-initial_position = 1
-
-[node name="LoadFromPOTTabConfirmationDialog" type="ConfirmationDialog" parent="." unique_id=2025379192]
-unique_name_in_owner = true
-oversampling_override = 1.0
-initial_position = 1
-size = Vector2i(458, 242)
-dialog_text = "Load OK?"
-
-[node name="SaveToPOTTabConfirmationDialog" type="ConfirmationDialog" parent="." unique_id=241830130]
-unique_name_in_owner = true
-oversampling_override = 1.0
-initial_position = 1
-size = Vector2i(458, 242)
-dialog_text = "Save OK?"
 
 [connection signal="visibility_changed" from="." to="." method="_on_visibility_changed"]
 [connection signal="pressed" from="TabContainer/Generals/HBoxContainer/POTGenerateButton" to="." method="_on_pot_generate_button_pressed"]
@@ -206,12 +199,12 @@ dialog_text = "Save OK?"
 [connection signal="toggled" from="TabContainer/Settings/SettingFolderLocal/VBoxContainer/DarkThemeCheckButton" to="." method="_on_dark_theme_check_button_toggled"]
 [connection signal="toggled" from="TabContainer/Settings/SettingFolderLocal/VBoxContainer/ClassIconCheckButton" to="." method="_on_class_icon_check_button_toggled"]
 [connection signal="toggled" from="TabContainer/Settings/SettingFolderLocal/VBoxContainer/WarningCheckButton" to="." method="_on_warning_check_button_toggled"]
+[connection signal="confirmed" from="TabContainer/Settings/SettingFolderLocal/VBoxContainer/WarningCheckButton/ConfirmationDialog" to="." method="_on_confirmation_dialog_confirmed"]
 [connection signal="toggled" from="TabContainer/Settings/SettingFolderGeneratePOT/VBoxContainer/SortCheckButton" to="." method="_on_sort_check_button_toggled"]
 [connection signal="toggled" from="TabContainer/Settings/SettingFolderGeneratePOT/VBoxContainer/SaveSortCheckButton" to="." method="_on_save_sort_check_button_toggled"]
 [connection signal="toggled" from="TabContainer/Settings/SettingFolderGeneratePOT/VBoxContainer/AddBuitinStringsToPOTCheckButton" to="." method="_on_add_buitin_strings_to_pot_check_button_toggled"]
 [connection signal="pressed" from="TabContainer/Tools/LoadFromPOTTabButton" to="." method="_on_load_from_pot_tab_button_pressed"]
+[connection signal="confirmed" from="TabContainer/Tools/LoadFromPOTTabButton/LoadFromPOTTabConfirmationDialog" to="." method="_on_load_from_pot_tab_confirmation_dialog_confirmed"]
 [connection signal="pressed" from="TabContainer/Tools/SaveToPOTTabButton" to="." method="_on_save_to_pot_tab_button_pressed"]
+[connection signal="confirmed" from="TabContainer/Tools/SaveToPOTTabButton/SaveToPOTTabConfirmationDialog" to="." method="_on_save_to_pot_tab_confirmation_dialog_confirmed"]
 [connection signal="pressed" from="TabContainer/Tools/DebugButton" to="." method="_on_debug_button_pressed"]
-[connection signal="confirmed" from="ConfirmationDialog" to="." method="_on_confirmation_dialog_confirmed"]
-[connection signal="confirmed" from="LoadFromPOTTabConfirmationDialog" to="." method="_on_load_from_pot_tab_confirmation_dialog_confirmed"]
-[connection signal="confirmed" from="SaveToPOTTabConfirmationDialog" to="." method="_on_save_to_pot_tab_confirmation_dialog_confirmed"]

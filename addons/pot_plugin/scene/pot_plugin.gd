@@ -69,18 +69,26 @@ func _ready() -> void:
 	
 	
 	
-	
+	##General
 	tab_container.set_tab_icon(0, get_theme_icon("File", "EditorIcons") )
-	tab_container.set_tab_icon(1, get_theme_icon("GDScript", "EditorIcons") )
-	tab_container.set_tab_icon(2, get_theme_icon("Tools", "EditorIcons") )
 	
 	pot_generate_button.icon = get_theme_icon("File", "EditorIcons")
 	pot_path_button.icon = get_theme_icon("Folder", "EditorIcons")
+	
+	##Setting
+	tab_container.set_tab_icon(1, get_theme_icon("GDScript", "EditorIcons") )
+	
 	dark_theme_check_button.icon = get_theme_icon("SphereOccluder3D", "EditorIcons")##Moon Icon
 	class_icon_check_button.icon = get_theme_icon("Image", "EditorIcons")
+	
 	sort_check_button.icon = get_theme_icon("Sort", "EditorIcons")
+	save_sort_check_button.icon = get_theme_icon("Sort", "EditorIcons")
 	warning_check_button.icon = get_theme_icon("NodeWarning", "EditorIcons")
 	add_buitin_strings_to_pot_check_button.icon = get_theme_icon("String", "EditorIcons")
+	
+	##Tool
+	tab_container.set_tab_icon(2, get_theme_icon("Tools", "EditorIcons") )
+	
 	load_from_pot_tab_button.icon = get_theme_icon("MoveDown", "EditorIcons")
 	save_to_pot_tab_button.icon = get_theme_icon("MoveUp", "EditorIcons")
 	debug_button.icon = get_theme_icon("Debug", "EditorIcons")
