@@ -476,7 +476,7 @@ func load_data() -> void:
 	pot_path_button.text = cfg.get_value("generation_setting", "pot_generate_path", "res://")
 	
 	sort_check_button.button_pressed = cfg.get_value("generation_setting", "enable_sort", true)
-	save_sort_check_button = cfg.get_value("generation_setting", "enable_save_sort", true)
+	save_sort_check_button.button_pressed = cfg.get_value("generation_setting", "enable_save_sort", true)
 	add_buitin_strings_to_pot_check_button.button_pressed = cfg.get_value("generation_setting", "add_builtin_strings_to_pot", false)
 
 
