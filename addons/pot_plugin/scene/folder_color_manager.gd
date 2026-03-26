@@ -12,7 +12,10 @@ func get_dir_or_file_color(dir:String) -> Dictionary[String, Color]:
 	
 	##---------------------------------------------------------
 	##先祖の一番近い色付きフォルダーの位置と色の名前を取得 ない場合は空
-	var ps:Dictionary = ProjectSettings.get_setting("file_customization/folder_colors")
+	var ps:Dictionary = {}
+	
+	if ProjectSettings.has_setting("file_customization/folder_colors"):
+		ps = ProjectSettings.get_setting("file_customization/folder_colors")
 	
 	
 	var max_length:int = 0
