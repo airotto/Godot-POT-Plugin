@@ -5,9 +5,9 @@ extends Tree
 @export var class_icon:bool = false
 
 ##全ての子にチェックをいれるディレクトリのパスのリスト(フォルダーの右のチェックついてるやつ)
-var all_check_dirs:PackedStringArray = []
+var all_check_dirs := PackedStringArray()
 ##チェック入ってるファイルのパス(uidがあればuid)のリスト
-var pot_generate_files:PackedStringArray = []
+var pot_generate_files := PackedStringArray()
 
 signal save
 

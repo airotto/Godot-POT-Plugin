@@ -33,6 +33,7 @@ var pot_path_select_dialog_position:Vector2
 @onready var warning_check_button: CheckButton = %WarningCheckButton
 
 @onready var sort_check_button: CheckButton = %SortCheckButton
+@onready var save_sort_check_button: CheckButton = %SaveSortCheckButton
 @onready var add_buitin_strings_to_pot_check_button: CheckButton = %AddBuitinStringsToPOTCheckButton
 
 @onready var load_from_pot_tab_button: Button = %LoadFromPOTTabButton
@@ -170,9 +171,6 @@ func pot_generate() -> void:
 	var last_pot:Array = get_pot_files()
 	
 	
-	
-	
-	
 	set_pot_files(get_pot_generate_files() )
 	
 	var file_dialog: EditorFileDialog = localization.get_child(5)
@@ -189,11 +187,11 @@ func pot_generate() -> void:
 
 
 func get_pot_generate_files() -> Array:
-	var pot_generate_files:PackedStringArray = []
+	var pot_generate_files := PackedStringArray()
 	
 	if sort_check_button.button_pressed:
-		var sorted_files:PackedStringArray = []
-		sort_iterate(pot_tree.get_root(), sorted_files)
+		var sorted_files := PackedStringArray()
+		sort_file_iterate(pot_tree.get_root(), sorted_files)
 		pot_generate_files = sorted_files
 	else:
 		pot_generate_files = pot_tree.pot_generate_files
@@ -404,12 +402,32 @@ func has_local_setting_data() -> bool:
 func save_data() -> void:
 	if not can_save:return
 	
+	
+	var all_check_dirs :=PackedStringArray()
+	var pot_generate_files := PackedStringArray()
+	
+	if save_sort_check_button.button_pressed:
+		var sorted_dirs := PackedStringArray()
+		sort_dir_iterate(pot_tree.get_root(), sorted_dirs)
+		all_check_dirs = sorted_dirs
+		
+		var sorted_files := PackedStringArray()
+		sort_file_iterate(pot_tree.get_root(), sorted_files)
+		pot_generate_files = sorted_files
+		
+	else:
+		all_check_dirs = pot_tree.all_check_dirs
+		pot_generate_files = pot_tree.pot_generate_files
+	
+	
+	
 	var cfg := ConfigFile.new()
-	cfg.set_value("generation", "all_check_dirs", pot_tree.all_check_dirs)
-	cfg.set_value("generation", "pot_generate_files", pot_tree.pot_generate_files)
+	cfg.set_value("generation", "all_check_dirs", all_check_dirs)
+	cfg.set_value("generation", "pot_generate_files", pot_generate_files)
 	
 	cfg.set_value("generation_setting", "pot_generate_path", pot_path_button.text)
 	cfg.set_value("generation_setting", "enable_sort", sort_check_button.button_pressed)
+	cfg.set_value("generation_setting", "enable_save_sort", save_sort_check_button.button_pressed)
 	cfg.set_value("generation_setting", "add_builtin_strings_to_pot", add_buitin_strings_to_pot_check_button.button_pressed)
 	
 	var ok:Error = cfg.save(SAVE_DATA_PATH)
@@ -458,6 +476,7 @@ func load_data() -> void:
 	pot_path_button.text = cfg.get_value("generation_setting", "pot_generate_path", "res://")
 	
 	sort_check_button.button_pressed = cfg.get_value("generation_setting", "enable_sort", true)
+	save_sort_check_button = cfg.get_value("generation_setting", "enable_save_sort", true)
 	add_buitin_strings_to_pot_check_button.button_pressed = cfg.get_value("generation_setting", "add_builtin_strings_to_pot", false)
 
 
@@ -576,7 +595,7 @@ func _on_class_icon_check_button_toggled(toggled_on: bool) -> void:
 
 
 
-func sort_iterate(item:TreeItem, sorted_files:PackedStringArray) -> void:
+func sort_file_iterate(item:TreeItem, sorted_files:PackedStringArray) -> void:
 	
 	if pot_tree.is_file(item):
 		var file:String = pot_tree.get_file(item)
@@ -585,8 +604,26 @@ func sort_iterate(item:TreeItem, sorted_files:PackedStringArray) -> void:
 	
 	
 	for i:TreeItem in item.get_children():
-		sort_iterate(i, sorted_files)
+		sort_file_iterate(i, sorted_files)
+
+
+func sort_dir_iterate(item:TreeItem, sorted_dirs:PackedStringArray) -> void:
+	
+	if pot_tree.is_dir(item):
+		var dir:String = pot_tree.get_dir(item)
+		if pot_tree.all_check_dirs.has(dir):
+			sorted_dirs.append(dir)
+	
+	
+	for i:TreeItem in item.get_children():
+		sort_dir_iterate(i, sorted_dirs)
+
+
 
 
 func _on_sort_check_button_toggled(toggled_on: bool) -> void:
+	save_data()
+
+
+func _on_save_sort_check_button_toggled(toggled_on: bool) -> void:
 	save_data()

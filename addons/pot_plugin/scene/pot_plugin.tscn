@@ -129,6 +129,22 @@ OFFの場合:チェックを付けたファイル(orフォルダごとチェッ�
 button_pressed = true
 text = "Sort"
 
+[node name="SaveSortCheckButton" type="CheckButton" parent="TabContainer/Settings/SettingFolderGeneratePOT/VBoxContainer" unique_id=1232812737]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 0
+tooltip_text = "ONの場合:生成されたファイルの中身の順番をソートします。
+ファイルが見つかった順にソートされます。
+つまり、
+・同じファイルから複数の翻訳がある場合それは並んでいます。
+・フォルダ毎にまとまっています。
+・同じ階層の場合はアルファベット順です
+
+生成するたびにソートが実行されます。全てのファイルを探索するので少し時間がかかるかもしれません。
+OFFの場合:チェックを付けたファイル(orフォルダごとチェックの中に追加されたファイル)はチェックを付けた順になります"
+button_pressed = true
+text = "Save Sort"
+
 [node name="AddBuitinStringsToPOTCheckButton" type="CheckButton" parent="TabContainer/Settings/SettingFolderGeneratePOT/VBoxContainer" unique_id=1103011955]
 unique_name_in_owner = true
 layout_mode = 2
@@ -191,6 +207,7 @@ dialog_text = "Save OK?"
 [connection signal="toggled" from="TabContainer/Settings/SettingFolderLocal/VBoxContainer/ClassIconCheckButton" to="." method="_on_class_icon_check_button_toggled"]
 [connection signal="toggled" from="TabContainer/Settings/SettingFolderLocal/VBoxContainer/WarningCheckButton" to="." method="_on_warning_check_button_toggled"]
 [connection signal="toggled" from="TabContainer/Settings/SettingFolderGeneratePOT/VBoxContainer/SortCheckButton" to="." method="_on_sort_check_button_toggled"]
+[connection signal="toggled" from="TabContainer/Settings/SettingFolderGeneratePOT/VBoxContainer/SaveSortCheckButton" to="." method="_on_save_sort_check_button_toggled"]
 [connection signal="toggled" from="TabContainer/Settings/SettingFolderGeneratePOT/VBoxContainer/AddBuitinStringsToPOTCheckButton" to="." method="_on_add_buitin_strings_to_pot_check_button_toggled"]
 [connection signal="pressed" from="TabContainer/Tools/LoadFromPOTTabButton" to="." method="_on_load_from_pot_tab_button_pressed"]
 [connection signal="pressed" from="TabContainer/Tools/SaveToPOTTabButton" to="." method="_on_save_to_pot_tab_button_pressed"]
