@@ -3,9 +3,9 @@ extends Control
 
 ##Addonのバージョンアップ時に入れなおすときにセーブデータを消さないようにaddonのフォルダ外にしている
 ##ここを変えればセーブデータの場所を変えれます。(セーブファイルの移動も忘れずに)
-const SAVE_DATA_PATH:String = "res://pot_plugin_save_data.txt"
+const SAVE_DATA_PATH:String = "res://pot_plugin_save_data.cfg"
 ##ローカルの設定は消えてもいいかなって。それ以外は上と同じ感じです。
-const LOCAL_SETTING_DATA_PATH:String = "res://.godot/pot_plugin_local_setting.txt"
+const LOCAL_SETTING_DATA_PATH:String = "res://.godot/pot_plugin_local_setting.cfg"
 
 @onready var tab_container: TabContainer = %TabContainer
 
@@ -404,53 +404,38 @@ func has_local_setting_data() -> bool:
 func save_data() -> void:
 	if not can_save:return
 	
-	var save_dictionary:Dictionary
+	var cfg := ConfigFile.new()
+	cfg.set_value("generation", "all_check_dirs", pot_tree.all_check_dirs)
+	cfg.set_value("generation", "pot_generate_files", pot_tree.pot_generate_files)
 	
+	cfg.set_value("generation_setting", "pot_generate_path", pot_path_button.text)
+	cfg.set_value("generation_setting", "enable_sort", sort_check_button.button_pressed)
+	cfg.set_value("generation_setting", "add_builtin_strings_to_pot", add_buitin_strings_to_pot_check_button.button_pressed)
 	
-	save_dictionary.all_check_dirs = pot_tree.all_check_dirs##常にオンにするディレクトリのリスト
-	save_dictionary.pot_generate_files = pot_tree.pot_generate_files##生成するファイルのリスト
-	
-	save_dictionary.pot_generate_path = pot_path_button.text##生成するpotファイルの保存場所
-	
-	save_dictionary.enable_sort = sort_check_button.button_pressed##生成時のソート
-	save_dictionary.add_builtin_strings_to_pot = add_buitin_strings_to_pot_check_button.button_pressed##生成時にビルトイン文字列を含むか
-	
-	
-	var save_text:String = var_to_str(save_dictionary)
-	
-	if save_text.is_empty():
-		push_error("POT Plugin : セーブを試みましたが、何らかの理由により空でセーブしようとしたため取りやめました")
+	var ok:Error = cfg.save(SAVE_DATA_PATH)
+	if ok != OK:
+		push_error("POT Plugin : can't save data")
 		return
 	
-	var save_file := FileAccess.open(SAVE_DATA_PATH,FileAccess.WRITE)
-	save_file.store_string(save_text)
-	
-	save_file.close()
 
 
 
 func save_local_setting() -> void:
 	if not can_save:return
 	
-	var save_dictionary:Dictionary
+	var cfg := ConfigFile.new()
+	cfg.set_value("local_setting", "enable_warning", warning_check_button.button_pressed)
+	cfg.set_value("local_setting", "is_dark_theme", dark_theme_check_button.button_pressed)
+	cfg.set_value("local_setting", "class_icon", class_icon_check_button.button_pressed)
 	
-	save_dictionary.enable_warning = warning_check_button.button_pressed
-	save_dictionary.is_dark_theme = dark_theme_check_button.button_pressed
-	save_dictionary.class_icon = class_icon_check_button.button_pressed
+	cfg.set_value("internal", "pot_path_select_dialog_size", pot_path_select_dialog_size)
+	cfg.set_value("internal", "pot_path_select_dialog_position", pot_path_select_dialog_position)
 	
-	save_dictionary.pot_path_select_dialog_size = pot_path_select_dialog_size
-	save_dictionary.pot_path_select_dialog_position = pot_path_select_dialog_position
-	
-	var save_text:String = var_to_str(save_dictionary)
-	
-	if save_text.is_empty():
-		push_error("POT Plugin : ローカル設定のセーブを試みましたが、何らかの理由により空でセーブしようとしたため取りやめました")
+	var ok:Error = cfg.save(LOCAL_SETTING_DATA_PATH)
+	if ok != OK:
+		push_error("POT Plugin : can't save local setting data")
 		return
 	
-	var save_file := FileAccess.open(LOCAL_SETTING_DATA_PATH,FileAccess.WRITE)
-	save_file.store_string(save_text)
-	
-	save_file.close()
 
 
 
@@ -461,23 +446,19 @@ func load_data() -> void:
 	if not has_save_data():
 		return
 	
-	var load_file := FileAccess.open(SAVE_DATA_PATH,FileAccess.READ)
-	var load_data_text:String = load_file.get_as_text()
-	load_file.close()
-	
-	if load_data_text.is_empty():
+	var cfg := ConfigFile.new()
+	var ok:Error = cfg.load(SAVE_DATA_PATH)
+	if ok != OK:
+		push_error("POT Plugin : can't load data")
 		return
 	
-	var save_dictionary:Dictionary = str_to_var(load_data_text)
+	pot_tree.all_check_dirs = cfg.get_value("generation", "all_check_dirs", PackedStringArray())
+	pot_tree.pot_generate_files = cfg.get_value("generation", "pot_generate_files", PackedStringArray())
 	
+	pot_path_button.text = cfg.get_value("generation_setting", "pot_generate_path", "res://")
 	
-	pot_tree.all_check_dirs = save_dictionary.all_check_dirs
-	pot_tree.pot_generate_files = save_dictionary.pot_generate_files
-	
-	pot_path_button.text = save_dictionary.pot_generate_path
-	
-	sort_check_button.button_pressed = save_dictionary.enable_sort
-	add_buitin_strings_to_pot_check_button.button_pressed = save_dictionary.add_builtin_strings_to_pot
+	sort_check_button.button_pressed = cfg.get_value("generation_setting", "enable_sort", true)
+	add_buitin_strings_to_pot_check_button.button_pressed = cfg.get_value("generation_setting", "add_builtin_strings_to_pot", false)
 
 
 
@@ -485,23 +466,18 @@ func load_local_setting() -> void:
 	if not has_local_setting_data():
 		return
 	
-	var load_file := FileAccess.open(LOCAL_SETTING_DATA_PATH,FileAccess.READ)
-	var load_data_text:String = load_file.get_as_text()
-	load_file.close()
-	
-	if load_data_text.is_empty():
+	var cfg := ConfigFile.new()
+	var ok:Error = cfg.load(LOCAL_SETTING_DATA_PATH)
+	if ok != OK:
+		push_error("POT Plugin : can't load local setting data")
 		return
 	
+	warning_check_button.button_pressed = cfg.get_value("local_setting", "enable_warning", true)
+	dark_theme_check_button.button_pressed = cfg.get_value("local_setting", "is_dark_theme", true)
+	class_icon_check_button.button_pressed = cfg.get_value("local_setting", "class_icon", false)
 	
-	var save_dictionary:Dictionary = str_to_var(load_data_text)
-	
-	warning_check_button.button_pressed = save_dictionary.enable_warning
-	dark_theme_check_button.button_pressed = save_dictionary.is_dark_theme
-	class_icon_check_button.button_pressed = save_dictionary.class_icon
-	
-	pot_path_select_dialog_size = save_dictionary.pot_path_select_dialog_size
-	pot_path_select_dialog_position = save_dictionary.pot_path_select_dialog_position
-	
+	pot_path_select_dialog_size = cfg.get_value("internal", "pot_path_select_dialog_size", Vector2())
+	pot_path_select_dialog_position = cfg.get_value("internal", "pot_path_select_dialog_position", Vector2())
 	
 
 

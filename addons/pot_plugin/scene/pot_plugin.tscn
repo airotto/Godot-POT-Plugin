@@ -126,6 +126,7 @@ tooltip_text = "ONの場合:生成されたファイルの中身の順番をソ�
 
 生成するたびにソートが実行されます。全てのファイルを探索するので少し時間がかかるかもしれません。
 OFFの場合:チェックを付けたファイル(orフォルダごとチェックの中に追加されたファイル)はチェックを付けた順になります"
+button_pressed = true
 text = "Sort"
 
 [node name="AddBuitinStringsToPOTCheckButton" type="CheckButton" parent="TabContainer/Settings/SettingFolderGeneratePOT/VBoxContainer" unique_id=1103011955]
