@@ -20,8 +20,8 @@ POT生成に含めるファイルをツリー状に選択できるようにす�
 なので間違えてオンにした場合Ctrl+Z等で戻りましょう。  
 
 ## データの場所
-何のファイルを含めるかなどのセーブデータは res://pot_plugin_save_data.txt に保存されます。  
-ローカルの設定データ(ダークテーマ等の個人的機能)は res://.godot/pot_plugin_local_setting.txt に保存されます。(.godot内なので基本gitignoreです)
+何のファイルを含めるかなどのセーブデータは res://pot_plugin_save_data.cfg に保存されます。  
+ローカルの設定データ(ダークテーマ等の個人的機能)は res://.godot/pot_plugin_local_setting.cfg に保存されます。(.godot内なので基本gitignoreです)
 
 
 ## その他

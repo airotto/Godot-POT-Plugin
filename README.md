@@ -22,8 +22,8 @@ If you uncheck it, the checkmark inside will be removed.
 Therefore, if you accidentally check it, use Ctrl+Z or similar to undo the action.  
 
 ## Data locations
-Save data, such as which files to include, is stored in res://pot_plugin_save_data.txt.  
-Local configuration data (such as personal settings like the dark theme) is stored in res://.godot/pot_plugin_local_setting.txt. (Since it's inside the .godot directory, it's generally ignored by gitignore.)  
+Save data, such as which files to include, is stored in res://pot_plugin_save_data.cfg.  
+Local configuration data (such as personal settings like the dark theme) is stored in res://.godot/pot_plugin_local_setting.cfg. (Since it's inside the .godot directory, it's generally ignored by gitignore.)  
 
 
 ## Other
