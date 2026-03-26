@@ -414,6 +414,9 @@ func save_data() -> void:
 	var all_check_dirs :=PackedStringArray()
 	var pot_generate_files := PackedStringArray()
 	
+	
+#region Save sort
+	
 	if save_sort_check_button.button_pressed:
 		var sorted_dirs := PackedStringArray()
 		sort_dir_iterate(pot_tree.get_root(), sorted_dirs)
@@ -427,6 +430,24 @@ func save_data() -> void:
 		all_check_dirs = pot_tree.all_check_dirs
 		pot_generate_files = pot_tree.pot_generate_files
 	
+#endregion
+	
+#region Array line break(1)
+	##文字列の最後に\nを追加
+	##ここではバックスラッシュ一個で反映される (バグ？##BUG ##NOTE　これのせいでバックスラッシュ一つだけ追加が不可能)　（詳しくは調べてない）
+	for i in all_check_dirs.size():
+		if i == 0:
+			##最初の要素なら最初にも追加
+			all_check_dirs[i] = "\n" + all_check_dirs[i]
+		all_check_dirs[i] = all_check_dirs[i] + "\n"
+	
+	for i in pot_generate_files.size():
+		if i == 0:
+			##最初の要素なら最初にも追加
+			pot_generate_files[i] = "\n" + pot_generate_files[i]
+		pot_generate_files[i] = pot_generate_files[i] + "\n"
+	
+#endregion
 	
 	
 	var cfg := ConfigFile.new()
@@ -438,12 +459,39 @@ func save_data() -> void:
 	cfg.set_value("generation_setting", "enable_save_sort", save_sort_check_button.button_pressed)
 	cfg.set_value("generation_setting", "add_builtin_strings_to_pot", add_buitin_strings_to_pot_check_button.button_pressed)
 	
-	var ok:Error = cfg.save(SAVE_DATA_PATH)
-	if ok != OK:
-		push_error("POT Plugin : can't save data")
-		return
 	
-
+#region if NOT Array line break
+	
+	#var ok:Error = cfg.save(SAVE_DATA_PATH)
+	#if ok != OK:
+		#push_error("POT Plugin : can't save data")
+		#return
+	
+#endregion
+	
+	
+	
+	
+#region Array line break(2)
+	var encoded:String = cfg.encode_to_text()
+	
+	##改行の変換にはバックスラッシュ
+	
+	##先ほど追加した\nとその前後からバックスラッシュ改行を作成
+	##(バックスラッシュ二個で文字としてのバックスラッシュ一個になります)
+	##最初
+	encoded = encoded.replace('"\\n', '\n	"')
+	##区切り
+	encoded = encoded.replace('\\n", ', '",\n	')
+	##最後
+	encoded = encoded.replace('\\n")', '"\n)')
+	
+	
+	var save_file := FileAccess.open(SAVE_DATA_PATH,FileAccess.WRITE)
+	save_file.store_string(encoded)
+	
+	save_file.close()
+#endregion
 
 
 func save_local_setting() -> void:
@@ -477,6 +525,8 @@ func load_data() -> void:
 	if ok != OK:
 		push_error("POT Plugin : can't load data")
 		return
+	
+	
 	
 	pot_tree.all_check_dirs = cfg.get_value("generation", "all_check_dirs", PackedStringArray())
 	pot_tree.pot_generate_files = cfg.get_value("generation", "pot_generate_files", PackedStringArray())
