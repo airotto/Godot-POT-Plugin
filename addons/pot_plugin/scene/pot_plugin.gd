@@ -245,7 +245,7 @@ func _on_pot_path_button_pressed() -> void:
 	
 	
 	##データがあったら位置とサイズをロード　なかったら初期位置
-	if has_save_data():
+	if has_local_setting_data():
 		pot_path_select_dialog.size = pot_path_select_dialog_size
 		pot_path_select_dialog.position = pot_path_select_dialog_position
 	else:
