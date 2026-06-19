@@ -195,7 +195,7 @@ func pot_generate() -> void:
 	##もとのadd_builtin_strings_to_potに戻す
 	set_add_builtin_strings_to_pot(last_add_builtin_strings_to_pot)
 	
-	print("POT generated (if not pushed error)")
+	print("POT generated")
 
 #endregion
 
