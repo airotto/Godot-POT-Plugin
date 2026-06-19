@@ -94,11 +94,17 @@ func _ready() -> void:
 	debug_button.icon = get_theme_icon("Debug", "EditorIcons")
 	
 	
-	load_data()
-	load_local_setting()
+	##ロードするが、もしどちらか一つでも失敗すれば、セーブはできないようにする
+	var ok:bool = true
+	if not load_data():
+		ok = false
+	if not load_local_setting():
+		ok = false
 	
-	
-	can_save = true
+	if ok:
+		can_save = true
+	else:
+		push_error("POT Plugin : Loading failed. The save feature has been disabled.")
 
 #region Selecting Path Line
 
@@ -516,15 +522,15 @@ func save_local_setting() -> void:
 
 
 ##ロードする
-func load_data() -> void:
+func load_data() -> bool:
 	if not has_save_data():
-		return
+		return true
 	
 	var cfg := ConfigFile.new()
 	var ok:Error = cfg.load(SAVE_DATA_PATH)
 	if ok != OK:
 		push_error("POT Plugin : can't load data")
-		return
+		return false
 	
 	
 	
@@ -536,18 +542,19 @@ func load_data() -> void:
 	sort_check_button.button_pressed = cfg.get_value("generation_setting", "enable_sort", true)
 	save_sort_check_button.button_pressed = cfg.get_value("generation_setting", "enable_save_sort", true)
 	add_buitin_strings_to_pot_check_button.button_pressed = cfg.get_value("generation_setting", "add_builtin_strings_to_pot", false)
+	
+	return true
 
 
-
-func load_local_setting() -> void:
+func load_local_setting() -> bool:
 	if not has_local_setting_data():
-		return
+		return true
 	
 	var cfg := ConfigFile.new()
 	var ok:Error = cfg.load(LOCAL_SETTING_DATA_PATH)
 	if ok != OK:
 		push_error("POT Plugin : can't load local setting data")
-		return
+		return false
 	
 	warning_check_button.button_pressed = cfg.get_value("local_setting", "enable_warning", true)
 	dark_theme_check_button.button_pressed = cfg.get_value("local_setting", "is_dark_theme", true)
@@ -556,6 +563,7 @@ func load_local_setting() -> void:
 	pot_path_select_dialog_size = cfg.get_value("internal", "pot_path_select_dialog_size", Vector2())
 	pot_path_select_dialog_position = cfg.get_value("internal", "pot_path_select_dialog_position", Vector2())
 	
+	return true
 
 
 
