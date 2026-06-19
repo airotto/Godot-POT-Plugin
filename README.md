@@ -31,3 +31,9 @@ Local configuration data (such as personal settings like the dark theme) is stor
 ![](Media/setting.png)  
 ### Tools  
 ![](Media/tool.png)  
+
+##
+Supported Versions (Previous versions are available on the branch):
+- 4.7
+- 4.6.3
+- 4.6.2
