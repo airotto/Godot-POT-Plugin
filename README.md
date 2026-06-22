@@ -32,6 +32,16 @@ Local configuration data (such as personal settings like the dark theme) is stor
 ### Tools  
 ![](Media/tool.png)  
 
+## Restrictions
+Automatic Tracking of File Moves
+- support
+- - Files with a UID
+- not support
+- - Files without a UID (.txt, .cfg, etc...)
+- - Folder
+
+For example, if you select an entire folder and then move it, the folder itself will be deselected, but the files within it that have a UID will remain checked.
+
 ##
 Supported Versions (Previous versions are available on the branch):
 - 4.7
