@@ -18,7 +18,7 @@ const COLUMN_LOCK:int = 1
 const FolderColorManager = preload("uid://comiy8ykyv6le")
 @onready var folder_color_manager: FolderColorManager = $FolderColorManager
 
-
+var reloaded:bool = false
 
 
 
@@ -77,6 +77,7 @@ func reload() -> void:
 	var resource_filesystem_dir:EditorFileSystemDirectory = EditorInterface.get_resource_filesystem().get_filesystem()
 	_reload_iterate(get_root(), resource_filesystem_dir)
 	
+	reloaded = true
 
 
 ##これは単独で実行しない  reloadを使用してください

@@ -415,7 +415,7 @@ func has_local_setting_data() -> bool:
 ##セーブする
 func save_data() -> void:
 	if not can_save:return
-	
+	if not pot_tree.reloaded:return
 	
 	var all_check_dirs :=PackedStringArray()
 	var pot_generate_files := PackedStringArray()
