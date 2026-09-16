@@ -1,4 +1,4 @@
-# POT Plugin
+# Godot POT Plugin
 This add-on allows you to select files to include in POT generation in a tree-like structure.
 
 ## Basics
