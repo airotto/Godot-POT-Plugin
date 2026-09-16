@@ -42,5 +42,6 @@ For example, if you select an entire folder and then move it, the folder itself 
 
 ## Versions Verified to Work (Previous versions are available on the branch):
 - 4.7
-- 4.6.3
-- 4.6.2
+- 4.6
+
+Since it relies on undocumented internal nodes, it may stop working after an update.
