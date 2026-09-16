@@ -43,7 +43,7 @@ Automatic Tracking of File Moves
 For example, if you select an entire folder and then move it, the folder itself will be deselected, but the files within it that have a UID will remain checked.
 
 ##
-Supported Versions (Previous versions are available on the branch):
+Versions Verified to Work (Previous versions are available on the branch):
 - 4.7
 - 4.6.3
 - 4.6.2
