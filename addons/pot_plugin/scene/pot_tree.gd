@@ -30,6 +30,15 @@ func _ready() -> void:
 	item_edited.connect(_on_item_edited)
 	check_propagated_to_item.connect(_on_check_propagated_to_item)
 	
+	item_collapsed.connect(_on_item_collapsed)
+
+
+func _on_item_collapsed(item: TreeItem) -> void:
+	if not item.collapsed:
+		for i in item.get_children():
+			if is_file(i):
+				set_icon(i, get_file(i))
+
 
 
 
@@ -77,6 +86,8 @@ func reload() -> void:
 	var resource_filesystem_dir:EditorFileSystemDirectory = EditorInterface.get_resource_filesystem().get_filesystem()
 	_reload_iterate(get_root(), resource_filesystem_dir)
 	
+	_on_item_collapsed(get_root())
+	
 	reloaded = true
 
 
@@ -97,7 +108,7 @@ func _reload_iterate(dir_item:TreeItem, dir:EditorFileSystemDirectory) -> void:
 		item.set_text(COLUMN_CHECK, dir.get_file(i))
 		item.set_auto_translate_mode(COLUMN_CHECK, Node.AUTO_TRANSLATE_MODE_DISABLED)
 		
-		set_icon(item, my_file_path)
+		
 		#item.set_icon(COLUMN_CHECK, get_class_icon_from_path_or_uid(my_file_path) )
 		
 		item.set_tooltip_text(COLUMN_CHECK, "チェックがついているとPOT生成に含まれます")
@@ -463,9 +474,8 @@ func get_class_icon_from_path_or_uid(path_or_uid:StringName) -> Texture2D:
 		
 		
 		var resource_class_name:StringName = res.get_class()
-		var global_class_icon := get_editor_icon(resource_class_name)
-		if global_class_icon:
-			return global_class_icon
+		if has_theme_icon(resource_class_name, &"EditorIcons"):
+			return get_editor_icon(resource_class_name)
 		
 	
 	
