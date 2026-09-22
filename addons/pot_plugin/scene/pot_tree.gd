@@ -47,10 +47,10 @@ func reload() -> void:
 	get_root().set_text(COLUMN_CHECK, "res://")
 	get_root().set_auto_translate_mode(COLUMN_CHECK, Node.AUTO_TRANSLATE_MODE_DISABLED)
 	
-	get_root().set_icon(COLUMN_CHECK, get_theme_icon("Folder", "EditorIcons") )
+	get_root().set_icon(COLUMN_CHECK, get_editor_icon(&"Folder") )
 	get_root().set_icon_modulate(COLUMN_CHECK, FolderColorManager.DEFAULT_FOLDER_ICON_COLOR)
 	
-	
+	add_theme_constant_override(&"icon_max_width", get_theme_constant(&"class_icon_size", &"Editor") )
 	
 	
 	
@@ -89,24 +89,25 @@ func _reload_iterate(dir_item:TreeItem, dir:EditorFileSystemDirectory) -> void:
 		
 		var item:TreeItem = create_item(dir_item)
 		
-		var uid:String = ResourceUID.path_to_uid(my_file_path)
+		var uid:StringName = ResourceUID.path_to_uid(my_file_path)
 		
-		item.set_metadata(COLUMN_CHECK, "file:" + uid)
+		item.set_meta(&"file_path", uid)
 		item.set_cell_mode(COLUMN_CHECK, TreeItem.CELL_MODE_CHECK)
 		item.set_editable(COLUMN_CHECK, true)
 		item.set_text(COLUMN_CHECK, dir.get_file(i))
 		item.set_auto_translate_mode(COLUMN_CHECK, Node.AUTO_TRANSLATE_MODE_DISABLED)
 		
-		item.set_icon(COLUMN_CHECK, get_class_icon_from_path_or_uid(my_file_path) )
+		set_icon(item, my_file_path)
+		#item.set_icon(COLUMN_CHECK, get_class_icon_from_path_or_uid(my_file_path) )
 		
 		item.set_tooltip_text(COLUMN_CHECK, "チェックがついているとPOT生成に含まれます")
 		
 		
 		
-		var color_dic:Dictionary[String, Color] = folder_color_manager.get_dir_or_file_color(ResourceUID.ensure_path(my_file_path))
+		var color_dic:Dictionary[StringName, Color] = folder_color_manager.get_dir_or_file_color(ResourceUID.ensure_path(my_file_path))
 		
-		item.set_custom_bg_color(0, color_dic.bg)
-		item.set_custom_bg_color(1, color_dic.bg)
+		item.set_custom_bg_color(0, color_dic[&"bg"])
+		item.set_custom_bg_color(1, color_dic[&"bg"])
 		
 		
 		
@@ -123,7 +124,7 @@ func _reload_iterate(dir_item:TreeItem, dir:EditorFileSystemDirectory) -> void:
 	
 	for i in dir.get_subdir_count():
 		var sub_dir:EditorFileSystemDirectory = dir.get_subdir(i)
-		var my_dir_path:String = sub_dir.get_path()
+		var my_dir_path:StringName = sub_dir.get_path()
 		
 		
 		var item:TreeItem = dir_item.create_child()
@@ -133,7 +134,7 @@ func _reload_iterate(dir_item:TreeItem, dir:EditorFileSystemDirectory) -> void:
 		
 		
 		
-		item.set_metadata(COLUMN_CHECK, "dir:"  + my_dir_path)
+		item.set_meta(&"dir_path", my_dir_path)
 		item.set_cell_mode(COLUMN_CHECK, TreeItem.CELL_MODE_CHECK)
 		item.set_editable(COLUMN_CHECK, false)
 		item.set_cell_mode(COLUMN_LOCK, TreeItem.CELL_MODE_CHECK)
@@ -141,22 +142,18 @@ func _reload_iterate(dir_item:TreeItem, dir:EditorFileSystemDirectory) -> void:
 		item.set_text(COLUMN_CHECK, sub_dir.get_name())
 		item.set_auto_translate_mode(COLUMN_CHECK, Node.AUTO_TRANSLATE_MODE_DISABLED)
 		
-		item.set_icon(COLUMN_CHECK, get_theme_icon("Folder", "EditorIcons") )
-		item.set_icon(COLUMN_LOCK, get_theme_icon("ThemeSelectAll", "EditorIcons") )
+		item.set_icon(COLUMN_CHECK, get_editor_icon(&"Folder") )
+		item.set_icon(COLUMN_LOCK, get_editor_icon(&"ThemeSelectAll") )
 		
 		item.set_tooltip_text(COLUMN_CHECK, "誤操作を防ぐためにロックされています　操作は右のチェックボックスから")
 		item.set_tooltip_text(COLUMN_LOCK, "このチェックがついているフォルダの中のファイルは自動でチェックが付きます。外すと、中のファイルはチェックが外れます。")
 		
 		
-		var color_dic:Dictionary[String, Color] = folder_color_manager.get_dir_or_file_color(my_dir_path)
+		var color_dic:Dictionary[StringName, Color] = folder_color_manager.get_dir_or_file_color(my_dir_path)
 		
-		item.set_custom_bg_color(0, color_dic.bg)
-		item.set_custom_bg_color(1, color_dic.bg)
-		item.set_icon_modulate(0, color_dic.icon)
-		
-		
-		#if my_dir_path.begins_with("res://new folder"):
-			#print(color_dic.bg)
+		item.set_custom_bg_color(0, color_dic[&"bg"])
+		item.set_custom_bg_color(1, color_dic[&"bg"])
+		item.set_icon_modulate(0, color_dic[&"icon"])
 		
 		
 		_reload_iterate(item, sub_dir)
@@ -399,28 +396,20 @@ func file_item_set_pot_generate_list(item:TreeItem) -> void:
 
 
 ##itemからディレクトリのパスを取得
-func get_dir(item:TreeItem) -> String:
-	var meta:String = item.get_metadata(COLUMN_CHECK)
-	return meta.trim_prefix("dir:")
+func get_dir(item:TreeItem) -> StringName:
+	return item.get_meta(&"dir_path")
 
 ##itemからファイルのパスを取得
-func get_file(item:TreeItem) -> String:
-	var meta:String = item.get_metadata(COLUMN_CHECK)
-	return meta.trim_prefix("file:")
+func get_file(item:TreeItem) -> StringName:
+	return item.get_meta(&"file_path")
 
 ##これがディレクトリのデータを持ったアイテムかであるか
 func is_dir(item:TreeItem) -> bool:
-	if item.get_metadata(COLUMN_CHECK) == null:return false
-	
-	var meta:String = item.get_metadata(COLUMN_CHECK)
-	return meta.begins_with("dir:")
+	return item.has_meta(&"dir_path")
 
 ##これがファイルのデータを持ったアイテムかであるか
 func is_file(item:TreeItem) -> bool:
-	if item.get_metadata(COLUMN_CHECK) == null:return false
-	
-	var meta:String = item.get_metadata(COLUMN_CHECK)
-	return meta.begins_with("file:")
+	return item.has_meta(&"file_path")
 
 #endregion
 
@@ -429,89 +418,86 @@ func is_file(item:TreeItem) -> bool:
 
 #region Visuals
 
+func set_icon(item:TreeItem, path_or_uid:StringName) -> void:
+	var icon:Texture2D
+	icon = await get_class_icon_from_path_or_uid(path_or_uid)
+	item.set_icon(COLUMN_CHECK, icon)
 
 
-##uid, class
-##もしカスタムクラスアイコンならpreffix c: です
-var resource_path_to_class_name_or_script_uid_cache:Dictionary[String, String]
-
-
-func get_class_icon_from_path_or_uid(path_or_uid:String) -> Texture2D:
+func get_class_icon_from_path_or_uid(path_or_uid:StringName) -> Texture2D:
 	var script_icon:Texture2D
 	
-	var res:Resource
 	
 	if class_icon and ResourceLoader.exists(path_or_uid):
 		var uid:String = ResourceUID.path_to_uid(path_or_uid)
-		##キャッシュが有ったらそれを使う
-		if resource_path_to_class_name_or_script_uid_cache.has(uid): ##NOTE ##このhasが結構重いっぽい
-			var c_name:String = resource_path_to_class_name_or_script_uid_cache[uid]
-			if c_name.begins_with("uid") or c_name.begins_with("res"):##カスタムアイコンのはパスで記録しているので
-				script_icon = find_custom_class_icon_or_null(c_name)
-			else:
-				script_icon = get_theme_icon(c_name, "EditorIcons")
-			
-		else:##なかったらロードして
-			res = load(uid)
+		
+		var res:Resource = await load(uid)
+		
+		
+		var resource_script_path:StringName
+		var script:Script = res.get_script()
+		if script:
+			resource_script_path = script.resource_path
 			
 			
+			var sc:Script = script
+			var icon:Texture2D
 			
-			if res.get_script():##カスタムスクリプトなら　そのクラスの独自のアイコンがないか探す
-				var script_path:String = res.get_script().resource_path
-				script_icon = find_custom_class_icon_or_null(script_path)
-				if script_icon:
-					resource_path_to_class_name_or_script_uid_cache[uid] = ResourceUID.path_to_uid(script_path)
+			while true:
 				
-			
-			if script_icon == null:##なければベースクラスのアイコンを探す
-				var c:String = res.get_class()
-				if has_theme_icon(c, "EditorIcons"):
-					script_icon = get_theme_icon(c, "EditorIcons")
-					resource_path_to_class_name_or_script_uid_cache[uid] = c
+				for dic:Dictionary in ProjectSettings.get_global_class_list():
+					if dic.path == sc.resource_path:
+						if (dic.icon as String):
+							icon = await load(dic.icon as String)
+							break
+				
+				if icon:
+					break
+				
+				sc = sc.get_base_script()
+				if not sc:
+					break
+				
+			if icon:
+				return icon
+		
+		
+		var resource_class_name:StringName = res.get_class()
+		var global_class_icon := get_editor_icon(resource_class_name)
+		if global_class_icon:
+			return global_class_icon
+		
 	
 	
-	
-	
-	
-	if script_icon == null:##なかったら　ファイルのアイコンにする
-		script_icon = get_theme_icon("File", "EditorIcons")
-	
-	
-	
-	return script_icon
+	return get_editor_icon(&"File")
 
-
-## icon_path, texture
-## scriptのパスではなくiconのパスです
-var custom_class_icon_cache:Dictionary[String, Texture2D]
-##script_resource_path = res.get_script().resource_path
-##scriptファイルのパスからもしあればカスタムクラスアイコン画像を返す
-func find_custom_class_icon_or_null(script_resource_path:String) -> Texture2D:
-	var script_icon:Texture2D
-	
-	for class_dic:Dictionary in ProjectSettings.get_global_class_list():
-		if class_dic.path == ResourceUID.ensure_path(script_resource_path):
-			if (class_dic.icon as String).is_empty():break
-			
-			if custom_class_icon_cache.has(class_dic.icon):
-				script_icon = custom_class_icon_cache[class_dic.icon]
-			else:
-				script_icon = load(class_dic.icon)
-				custom_class_icon_cache[class_dic.icon] = load(class_dic.icon)
-			
-			break
-	
-	return script_icon
+var _editor_icon_cache:Dictionary[StringName, Texture2D]
+func get_editor_icon(_name:StringName) -> Texture2D:
+	if not _editor_icon_cache.has(_name):
+		_editor_icon_cache[_name] = get_theme_icon(_name, &"EditorIcons")
+	return _editor_icon_cache[_name]
 
 
 ##UNUSED
 func clear_cache() -> void:
-	resource_path_to_class_name_or_script_uid_cache.clear()
-	custom_class_icon_cache.clear()
+	pass
 
 
 
-
-
+##Cowが破壊されるのでやめとく
+#func load_thread(path: String) -> Resource:
+	#var error := ResourceLoader.load_threaded_request(path, "", true)
+	#
+	#if error != Error.OK:
+		#return null
+	#
+	#while ResourceLoader.load_threaded_get_status(path) == ResourceLoader.ThreadLoadStatus.THREAD_LOAD_IN_PROGRESS:
+		#await get_tree().process_frame
+	#
+	#var status := ResourceLoader.load_threaded_get_status(path)
+	#if status != ResourceLoader.ThreadLoadStatus.THREAD_LOAD_LOADED:
+		#return null
+	#
+	#return ResourceLoader.load_threaded_get(path)
 
 #endregion
