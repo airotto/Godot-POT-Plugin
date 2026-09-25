@@ -9,6 +9,9 @@ var all_check_dirs := PackedStringArray()
 ##チェック入ってるファイルのパス(uidがあればuid)のリスト
 var pot_generate_files := PackedStringArray()
 
+##キャッシュ 
+var _path_uid_hashmap : Dictionary[String, String]
+
 signal save
 
 const COLUMN_CHECK:int = 0
@@ -36,11 +39,25 @@ func _ready() -> void:
 func _on_item_collapsed(item: TreeItem) -> void:
 	if not item.collapsed:
 		for i in item.get_children():
-			if is_file(i):
-				set_icon(i, get_file(i))
+			set_icon(i)
+			
+			set_color(i)
 
 
-
+func set_color(item:TreeItem) -> void:
+	
+	if is_file(item):
+		var color_dic:Dictionary[StringName, Color] = folder_color_manager.get_dir_or_file_color(get_file(item))
+		
+		item.set_custom_bg_color(0, color_dic[&"bg"])
+		item.set_custom_bg_color(1, color_dic[&"bg"])
+		return
+	if is_dir(item):
+		var color_dic:Dictionary[StringName, Color] = folder_color_manager.get_dir_or_file_color(get_dir(item))
+		
+		item.set_custom_bg_color(0, color_dic[&"bg"])
+		item.set_custom_bg_color(1, color_dic[&"bg"])
+		item.set_icon_modulate(0, color_dic[&"icon"])
 
 
 
@@ -50,16 +67,20 @@ func _on_item_collapsed(item: TreeItem) -> void:
 
 ##リロードする
 func reload() -> void:
-	clear()
-	create_item()
+	#var start_time = Time.get_ticks_usec()
 	
-	get_root().set_text(COLUMN_CHECK, "res://")
-	get_root().set_auto_translate_mode(COLUMN_CHECK, Node.AUTO_TRANSLATE_MODE_DISABLED)
+	var root := get_root()
 	
-	get_root().set_icon(COLUMN_CHECK, get_editor_icon(&"Folder") )
-	get_root().set_icon_modulate(COLUMN_CHECK, FolderColorManager.DEFAULT_FOLDER_ICON_COLOR)
-	
-	add_theme_constant_override(&"icon_max_width", get_theme_constant(&"class_icon_size", &"Editor") )
+	if not root:
+		root = create_item()
+		
+		root.set_text(COLUMN_CHECK, "res://")
+		root.set_auto_translate_mode(COLUMN_CHECK, Node.AUTO_TRANSLATE_MODE_DISABLED)
+		
+		root.set_icon(COLUMN_CHECK, get_editor_icon(&"Folder") )
+		root.set_icon_modulate(COLUMN_CHECK, FolderColorManager.DEFAULT_FOLDER_ICON_COLOR)
+		
+		add_theme_constant_override(&"icon_max_width", get_theme_constant(&"class_icon_size", &"Editor") )
 	
 	
 	
@@ -80,54 +101,70 @@ func reload() -> void:
 			print("POT Plugin : file not exists " + file_path + " (not error)")
 	
 	
-	
+	## uidをpathにするのは高速だが、逆は超低速なので　pathをuidに変換をしないような実装にしている
+	_path_uid_hashmap.clear()
+	for uid:String in pot_generate_files:
+		_path_uid_hashmap[ResourceUID.ensure_path(uid)] = uid
 	
 	
 	var resource_filesystem_dir:EditorFileSystemDirectory = EditorInterface.get_resource_filesystem().get_filesystem()
-	_reload_iterate(get_root(), resource_filesystem_dir)
+	_reload_iterate(root, resource_filesystem_dir)
 	
-	_on_item_collapsed(get_root())
+	_on_item_collapsed(root)
 	
 	reloaded = true
+	
+	#var start_time = Time.get_ticks_usec()
+	
+	
+	#for i in 1000:
+	pass
+	
+	#var end_time = Time.get_ticks_usec()
+	#var elapsed_time = end_time - start_time
+	#print("経過時間: ", elapsed_time, " マイクロ秒")
 
 
 ##これは単独で実行しない  reloadを使用してください
 func _reload_iterate(dir_item:TreeItem, dir:EditorFileSystemDirectory) -> void:
 	
+	## 足りなかったら作成　多かったら削除　オブジェクトプールみたいな感じ
+	if dir_item.get_child_count() > dir.get_subdir_count() + dir.get_file_count():
+		for i in dir_item.get_child_count() - dir.get_subdir_count() + dir.get_file_count():
+			dir_item.remove_child(dir_item.get_first_child())
+	elif dir_item.get_child_count() < dir.get_subdir_count() + dir.get_file_count():
+		for i in dir.get_subdir_count() + dir.get_file_count() - dir_item.get_child_count():
+			dir_item.create_child()
+	
+	
 	for i in dir.get_file_count():
-		var my_file_path:String = dir.get_file_path(i)
+		var my_file_path:StringName = dir.get_file_path(i)
+		
+		var item:TreeItem = dir_item.get_child(i)
 		
 		
-		var item:TreeItem = create_item(dir_item)
-		
-		var uid:StringName = ResourceUID.path_to_uid(my_file_path)
-		
-		item.set_meta(&"file_path", uid)
+		item.remove_meta(&"dir_path")
+		item.remove_meta(&"file_uid")
+		item.set_meta(&"file_path", my_file_path)
 		item.set_cell_mode(COLUMN_CHECK, TreeItem.CELL_MODE_CHECK)
 		item.set_editable(COLUMN_CHECK, true)
 		item.set_text(COLUMN_CHECK, dir.get_file(i))
 		item.set_auto_translate_mode(COLUMN_CHECK, Node.AUTO_TRANSLATE_MODE_DISABLED)
 		
 		
-		#item.set_icon(COLUMN_CHECK, get_class_icon_from_path_or_uid(my_file_path) )
-		
 		item.set_tooltip_text(COLUMN_CHECK, "チェックがついているとPOT生成に含まれます")
 		
 		
 		
-		var color_dic:Dictionary[StringName, Color] = folder_color_manager.get_dir_or_file_color(ResourceUID.ensure_path(my_file_path))
-		
-		item.set_custom_bg_color(0, color_dic[&"bg"])
-		item.set_custom_bg_color(1, color_dic[&"bg"])
-		
-		
 		
 		##データから読み込む
-		if pot_generate_files.has(uid):
+		if _path_uid_hashmap.keys().has(my_file_path):
 			#print(uid)
+			item.set_meta(&"file_uid", _path_uid_hashmap[my_file_path])
+			
 			item.set_checked(COLUMN_CHECK, true)
 			item.propagate_check(COLUMN_CHECK, false)
-			
+		
 	
 	
 	
@@ -138,13 +175,14 @@ func _reload_iterate(dir_item:TreeItem, dir:EditorFileSystemDirectory) -> void:
 		var my_dir_path:StringName = sub_dir.get_path()
 		
 		
-		var item:TreeItem = dir_item.create_child()
+		var item:TreeItem = dir_item.get_child(dir.get_file_count() + i)
 		item.set_collapsed_recursive(true)
 		
 		
 		
 		
-		
+		item.remove_meta(&"file_path")
+		item.remove_meta(&"file_uid")
 		item.set_meta(&"dir_path", my_dir_path)
 		item.set_cell_mode(COLUMN_CHECK, TreeItem.CELL_MODE_CHECK)
 		item.set_editable(COLUMN_CHECK, false)
@@ -153,18 +191,9 @@ func _reload_iterate(dir_item:TreeItem, dir:EditorFileSystemDirectory) -> void:
 		item.set_text(COLUMN_CHECK, sub_dir.get_name())
 		item.set_auto_translate_mode(COLUMN_CHECK, Node.AUTO_TRANSLATE_MODE_DISABLED)
 		
-		item.set_icon(COLUMN_CHECK, get_editor_icon(&"Folder") )
-		item.set_icon(COLUMN_LOCK, get_editor_icon(&"ThemeSelectAll") )
 		
 		item.set_tooltip_text(COLUMN_CHECK, "誤操作を防ぐためにロックされています　操作は右のチェックボックスから")
 		item.set_tooltip_text(COLUMN_LOCK, "このチェックがついているフォルダの中のファイルは自動でチェックが付きます。外すと、中のファイルはチェックが外れます。")
-		
-		
-		var color_dic:Dictionary[StringName, Color] = folder_color_manager.get_dir_or_file_color(my_dir_path)
-		
-		item.set_custom_bg_color(0, color_dic[&"bg"])
-		item.set_custom_bg_color(1, color_dic[&"bg"])
-		item.set_icon_modulate(0, color_dic[&"icon"])
 		
 		
 		_reload_iterate(item, sub_dir)
@@ -244,9 +273,9 @@ func _on_item_edited() -> void:
 		var _name:String = ""
 		if is_file(item):
 			if item.is_checked(COLUMN_CHECK):
-				_name = "POT Plugin : ファイル %s を追加" % ResourceUID.ensure_path(get_file(item) )
+				_name = "POT Plugin : ファイル %s を追加" % get_file(item)
 			else:
-				_name = "POT Plugin : ファイル %s を除去" % ResourceUID.ensure_path(get_file(item) )
+				_name = "POT Plugin : ファイル %s を除去" % get_file(item)
 		elif is_dir(item):
 			if item.is_checked(COLUMN_LOCK):
 				_name = "POT Plugin : ディレクトリ %s を追加" % get_dir(item) 
@@ -390,16 +419,19 @@ func dir_item_set_pot_generate_list(item:TreeItem) -> void:
 func file_item_set_pot_generate_list(item:TreeItem) -> void:
 	if not is_file(item):return
 	
-	var uid:String = get_file(item)
+	var path:String = get_file(item)
+	var uid:String = get_uid_if_selected(item) if has_uid_meta(item) else (path if ResourceLoader.get_resource_uid(path) == -1 else ResourceUID.path_to_uid(path))
 	
 	
 	if item.is_checked(COLUMN_CHECK):
 		if not pot_generate_files.has(uid):
 			#print("POT Plugin : append file " + ResourceUID.ensure_path(uid))
+			item.set_meta(&"file_uid", uid)
 			pot_generate_files.append(uid)
 	else:
 		if pot_generate_files.has(uid):
 			#print("POT Plugin : remove file " + ResourceUID.ensure_path(uid))
+			#item.remove_meta(&"file_uid")
 			pot_generate_files.erase(uid)
 	
 
@@ -413,6 +445,14 @@ func get_dir(item:TreeItem) -> StringName:
 ##itemからファイルのパスを取得
 func get_file(item:TreeItem) -> StringName:
 	return item.get_meta(&"file_path")
+
+##itemからファイルのuidを取得
+## 注意:選択されている場合のみ
+func get_uid_if_selected(item:TreeItem) -> StringName:
+	return item.get_meta(&"file_uid")
+
+func has_uid_meta(item:TreeItem) -> bool:
+	return item.has_meta(&"file_uid")
 
 ##これがディレクトリのデータを持ったアイテムかであるか
 func is_dir(item:TreeItem) -> bool:
@@ -429,20 +469,21 @@ func is_file(item:TreeItem) -> bool:
 
 #region Visuals
 
-func set_icon(item:TreeItem, path_or_uid:StringName) -> void:
-	var icon:Texture2D
-	icon = await get_class_icon_from_path_or_uid(path_or_uid)
-	item.set_icon(COLUMN_CHECK, icon)
+func set_icon(item:TreeItem) -> void:
+	if is_file(item):
+		var icon:Texture2D = await get_class_icon(get_file(item))
+		item.set_icon(COLUMN_CHECK, icon)
+	elif is_dir(item):
+		item.set_icon(COLUMN_CHECK, get_editor_icon(&"Folder") )
+		item.set_icon(COLUMN_LOCK, get_editor_icon(&"ThemeSelectAll") )
 
 
-func get_class_icon_from_path_or_uid(path_or_uid:StringName) -> Texture2D:
+func get_class_icon(path:StringName) -> Texture2D:
 	var script_icon:Texture2D
 	
 	
-	if class_icon and ResourceLoader.exists(path_or_uid):
-		var uid:String = ResourceUID.path_to_uid(path_or_uid)
-		
-		var res:Resource = await load(uid)
+	if class_icon and ResourceLoader.exists(path):
+		var res:Resource = await load(path)
 		
 		
 		var resource_script_path:StringName
@@ -476,6 +517,8 @@ func get_class_icon_from_path_or_uid(path_or_uid:StringName) -> Texture2D:
 		var resource_class_name:StringName = res.get_class()
 		if has_theme_icon(resource_class_name, &"EditorIcons"):
 			return get_editor_icon(resource_class_name)
+		else:
+			return get_editor_icon(&"Object")
 		
 	
 	

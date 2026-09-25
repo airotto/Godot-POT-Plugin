@@ -115,7 +115,7 @@ func _on_pot_tree_item_selected() -> void:
 		return
 	
 	if pot_tree.is_file(pot_tree.get_selected()):
-		selecting_path_line_edit.text = ResourceUID.ensure_path(pot_tree.get_file(pot_tree.get_selected()))
+		selecting_path_line_edit.text = pot_tree.get_file(pot_tree.get_selected())
 		return
 	
 	selecting_path_line_edit.text = pot_tree.get_selected().get_text(0)
@@ -137,7 +137,7 @@ func find_iterate_from_path(item:TreeItem, path:String) -> TreeItem:
 		if path == pot_tree.get_dir(item):
 			return item
 	elif pot_tree.is_file(item):
-		if path == ResourceUID.ensure_path(pot_tree.get_file(item)):
+		if path == pot_tree.get_file(item):
 			return item
 	else:
 		if path == item.get_text(0):
@@ -366,8 +366,9 @@ func debug_iterate(item:TreeItem) -> void:
 	for i:TreeItem in item.get_children():
 		
 		if pot_tree.is_file(i):
-			var uid:String = pot_tree.get_file(i)
-			var path:String = ResourceUID.ensure_path(uid)
+			var path:String = pot_tree.get_file(i)
+			var uid:String = pot_tree.get_uid_if_selected(i) if pot_tree.has_uid_meta(i) else (path if ResourceLoader.get_resource_uid(path) == -1 else ResourceUID.path_to_uid(path))
+				
 			if i.is_checked(pot_tree.COLUMN_CHECK):
 				if not pot_tree.pot_generate_files.has(uid):
 					push_error("file " + path + " が無い　期待する状態：有る")
@@ -631,7 +632,7 @@ func load_from_pot_tab_iterate(item:TreeItem, pot_files:Array, undo_redo:EditorU
 	
 	if pot_tree.is_file(item):
 		if item.is_checked(PotTree.COLUMN_CHECK) == false:
-			if pot_files.has( ResourceUID.ensure_path(pot_tree.get_file(item)) ):
+			if pot_files.has( pot_tree.get_file(item) ):
 				undo_redo.add_do_method(item, &"set_checked", PotTree.COLUMN_CHECK, true)
 				undo_redo.add_do_method(pot_tree, &"item_action", item, PotTree.COLUMN_CHECK)
 				
@@ -664,9 +665,10 @@ func _on_class_icon_check_button_toggled(toggled_on: bool) -> void:
 func sort_file_iterate(item:TreeItem, sorted_files:PackedStringArray) -> void:
 	
 	if pot_tree.is_file(item):
-		var file:String = pot_tree.get_file(item)
-		if pot_tree.pot_generate_files.has(file):
-			sorted_files.append(file)
+		if pot_tree.has_uid_meta(item):
+			var uid:String = pot_tree.get_uid_if_selected(item)
+			if pot_tree.pot_generate_files.has(uid):
+				sorted_files.append(uid)
 	
 	
 	for i:TreeItem in item.get_children():
