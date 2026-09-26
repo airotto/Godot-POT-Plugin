@@ -117,6 +117,7 @@ func reload() -> void:
 		
 		if DirAccess.dir_exists_absolute(dir_path) == false:
 			all_check_dirs.erase(dir_path)
+			last_expanded_dirs.erase(dir_path)
 			print("POT Plugin : all check dir not exists " + dir_path + " (not error)")
 			
 	
@@ -135,6 +136,9 @@ func reload() -> void:
 	
 	var resource_filesystem_dir:EditorFileSystemDirectory = EditorInterface.get_resource_filesystem().get_filesystem()
 	_reload_iterate(root, resource_filesystem_dir)
+	
+	## パフォーマンスが良くなればとの思いで ここでclear
+	_path_uid_hashmap.clear()
 	
 	_on_item_collapsed(root)
 	
