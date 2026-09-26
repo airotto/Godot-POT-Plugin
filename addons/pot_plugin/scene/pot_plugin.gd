@@ -309,6 +309,7 @@ func _on_project_settings_window_visibility_changed() -> void:
 	if not project_settings_window.visible:
 		if is_node_ready():
 			save_data()
+			save_local_setting()
 
 
 ##再表示時リロード可能ならリロードする
@@ -511,6 +512,8 @@ func save_local_setting() -> void:
 	
 	cfg.set_value("internal", "pot_path_select_dialog_size", pot_path_select_dialog_size)
 	cfg.set_value("internal", "pot_path_select_dialog_position", pot_path_select_dialog_position)
+	pot_tree.save_expanded(pot_tree.get_root())
+	cfg.set_value("internal", "last_expanded_dirs", pot_tree.last_expanded_dirs)
 	
 	var ok:Error = cfg.save(LOCAL_SETTING_DATA_PATH)
 	if ok != OK:
@@ -563,6 +566,7 @@ func load_local_setting() -> bool:
 	
 	pot_path_select_dialog_size = cfg.get_value("internal", "pot_path_select_dialog_size", Vector2())
 	pot_path_select_dialog_position = cfg.get_value("internal", "pot_path_select_dialog_position", Vector2())
+	pot_tree.last_expanded_dirs = cfg.get_value("internal", "last_expanded_dirs", PackedStringArray())
 	
 	return true
 

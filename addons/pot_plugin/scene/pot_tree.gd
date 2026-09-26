@@ -11,6 +11,10 @@ var pot_generate_files := PackedStringArray()
 
 ##キャッシュ 
 var _path_uid_hashmap : Dictionary[String, String]
+##前回展開していたディレクトリ
+##
+## save_expanded()参照
+var last_expanded_dirs := PackedStringArray()
 
 signal save
 
@@ -42,6 +46,13 @@ func _on_item_collapsed(item: TreeItem) -> void:
 			set_icon(i)
 			
 			set_color(i)
+			
+			
+			if is_dir(i):
+				var dir := get_dir(i)
+				if last_expanded_dirs.has(dir):
+					last_expanded_dirs.erase(dir)
+					i.collapsed = false
 
 
 func set_color(item:TreeItem) -> void:
@@ -59,6 +70,21 @@ func set_color(item:TreeItem) -> void:
 		item.set_custom_bg_color(1, color_dic[&"bg"])
 		item.set_icon_modulate(0, color_dic[&"icon"])
 
+
+## scne/pot_plugin.gd の save_local_setting() で実行されます。
+## save_local_setting() はプロジェクト設定ウィンドウを閉じたときに(も)実行されます
+func save_expanded(item:TreeItem) -> void:
+	if not item:return
+	
+	for i in item.get_children():
+		if is_dir(i):
+			
+			if not i.collapsed:
+				var dir := get_dir(i)
+				if not last_expanded_dirs.has(dir):
+					last_expanded_dirs.append(dir)
+			
+			save_expanded(i)
 
 
 #region Reload
