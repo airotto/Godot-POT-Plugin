@@ -31,7 +31,7 @@ Local configuration data (such as personal settings like the dark theme) is stor
 ![](Media/tool.png)  
 
 ## Restrictions
-Automatic Tracking of File Moves
+Automatic Tracking of File Moves and Renames
 - support
 - - Files with a UID
 - not support
