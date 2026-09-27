@@ -94,19 +94,18 @@ func save_expanded(item:TreeItem) -> void:
 ##リロードする
 func reload() -> void:
 	#var start_time = Time.get_ticks_usec()
+	clear()
 	
+	create_item()
 	var root := get_root()
 	
-	if not root:
-		root = create_item()
-		
-		root.set_text(COLUMN_CHECK, "res://")
-		root.set_auto_translate_mode(COLUMN_CHECK, Node.AUTO_TRANSLATE_MODE_DISABLED)
-		
-		root.set_icon(COLUMN_CHECK, get_editor_icon(&"Folder") )
-		root.set_icon_modulate(COLUMN_CHECK, FolderColorManager.DEFAULT_FOLDER_ICON_COLOR)
-		
-		add_theme_constant_override(&"icon_max_width", get_theme_constant(&"class_icon_size", &"Editor") )
+	root.set_text(COLUMN_CHECK, "res://")
+	root.set_auto_translate_mode(COLUMN_CHECK, Node.AUTO_TRANSLATE_MODE_DISABLED)
+	
+	root.set_icon(COLUMN_CHECK, get_editor_icon(&"Folder") )
+	root.set_icon_modulate(COLUMN_CHECK, FolderColorManager.DEFAULT_FOLDER_ICON_COLOR)
+	
+	add_theme_constant_override(&"icon_max_width", get_theme_constant(&"class_icon_size", &"Editor") )
 	
 	
 	
@@ -158,23 +157,12 @@ func reload() -> void:
 ##これは単独で実行しない  reloadを使用してください
 func _reload_iterate(dir_item:TreeItem, dir:EditorFileSystemDirectory) -> void:
 	
-	## 足りなかったら作成　多かったら削除　オブジェクトプールみたいな感じ
-	if dir_item.get_child_count() > dir.get_subdir_count() + dir.get_file_count():
-		for i in dir_item.get_child_count() - dir.get_subdir_count() + dir.get_file_count():
-			dir_item.remove_child(dir_item.get_first_child())
-	elif dir_item.get_child_count() < dir.get_subdir_count() + dir.get_file_count():
-		for i in dir.get_subdir_count() + dir.get_file_count() - dir_item.get_child_count():
-			dir_item.create_child()
-	
-	
 	for i in dir.get_file_count():
 		var my_file_path:StringName = dir.get_file_path(i)
 		
-		var item:TreeItem = dir_item.get_child(i)
+		var item:TreeItem = dir_item.create_child()
 		
 		
-		item.remove_meta(&"dir_path")
-		item.remove_meta(&"file_uid")
 		item.set_meta(&"file_path", my_file_path)
 		item.set_cell_mode(COLUMN_CHECK, TreeItem.CELL_MODE_CHECK)
 		item.set_editable(COLUMN_CHECK, true)
@@ -205,14 +193,12 @@ func _reload_iterate(dir_item:TreeItem, dir:EditorFileSystemDirectory) -> void:
 		var my_dir_path:StringName = sub_dir.get_path()
 		
 		
-		var item:TreeItem = dir_item.get_child(dir.get_file_count() + i)
+		var item:TreeItem = dir_item.create_child()
 		item.set_collapsed_recursive(true)
 		
 		
 		
 		
-		item.remove_meta(&"file_path")
-		item.remove_meta(&"file_uid")
 		item.set_meta(&"dir_path", my_dir_path)
 		item.set_cell_mode(COLUMN_CHECK, TreeItem.CELL_MODE_CHECK)
 		item.set_editable(COLUMN_CHECK, false)

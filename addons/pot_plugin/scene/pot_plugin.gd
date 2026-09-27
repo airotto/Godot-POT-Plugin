@@ -66,6 +66,10 @@ func _ready() -> void:
 	project_settings_window.visibility_changed.connect(_on_project_settings_window_visibility_changed)
 	
 	EditorInterface.get_resource_filesystem().filesystem_changed.connect(_on_filesystem_changed)
+	EditorInterface.get_file_system_dock().files_moved.connect(_on_file_system_dock_files_moved)
+	EditorInterface.get_file_system_dock().file_removed.connect(_on_file_system_dock_file_removed)
+	EditorInterface.get_file_system_dock().folder_moved.connect(_on_file_system_dock_folder_moved)
+	EditorInterface.get_file_system_dock().folder_removed.connect(_on_file_system_dock_folder_removed)
 	
 	
 	
@@ -302,6 +306,56 @@ func _on_warning_check_button_toggled(toggled_on: bool) -> void:
 ##ファイルシステムが何かしら変わったらリロード可能にする
 func _on_filesystem_changed() -> void:
 	can_reload = true
+
+
+func _on_file_system_dock_files_moved(old_file: String, new_file: String) -> void:
+	#print("File Moved: ", old_file, ", ", new_file)
+	
+	## 生成に含まれるファイル且つuidが無いファイルである確認
+	if not pot_tree.pot_generate_files.has(old_file):
+		return
+	
+	pot_tree.pot_generate_files.erase(old_file)
+	pot_tree.pot_generate_files.append(new_file)
+	
+	can_reload = true
+
+
+func _on_file_system_dock_file_removed(file: String) -> void:
+	#print("File Removed: ", file)
+	
+	if pot_tree.pot_generate_files.has(file):
+		pot_tree.pot_generate_files.erase(file)
+		
+		can_reload = true
+
+
+func _on_file_system_dock_folder_moved(old_folder: String, new_folder: String) -> void:
+	## エンジンの ##BUG ?
+	if not new_folder.ends_with("/"):
+		new_folder = new_folder + "/"
+	
+	#print("Folder Moved: ", old_folder, ", ", new_folder)
+	
+	if pot_tree.all_check_dirs.has(old_folder):
+		pot_tree.all_check_dirs.erase(old_folder)
+		pot_tree.all_check_dirs.append(new_folder)
+		
+		can_reload = true
+
+
+func _on_file_system_dock_folder_removed(folder: String) -> void:
+	#print("Folder Removed: ", folder)
+	
+	if pot_tree.all_check_dirs.has(folder):
+		pot_tree.all_check_dirs.erase(folder)
+		
+		can_reload = true
+
+
+
+
+
 
 
 
