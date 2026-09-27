@@ -546,7 +546,7 @@ func save_data() -> void:
 	##区切り
 	encoded = encoded.replace('\\n", ', '",\n	')
 	##最後
-	encoded = encoded.replace('\\n")', '"\n)')
+	encoded = encoded.replace('\\n")', '",\n)')
 	
 	
 	var save_file := FileAccess.open(SAVE_DATA_PATH,FileAccess.WRITE)
